@@ -1,8 +1,8 @@
 import type { Activity } from '../types'
 import { CLAWD_FRAMES, CLAWD_WINDOW } from './clawd-sprites'
 
-// 1.5 keeps every pixel crisp on 2x screens (3 device pixels) while keeping the band short.
-const P = 1.5
+// One CSS pixel per sprite pixel keeps the mascot about one text line tall, so the band stays thin.
+const P = 1
 
 export const MASCOT_WIDTH = CLAWD_WINDOW.width * P
 export const MASCOT_HEIGHT = CLAWD_WINDOW.height * P
