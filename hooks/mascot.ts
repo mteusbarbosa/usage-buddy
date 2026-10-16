@@ -1,17 +1,15 @@
 import type { Activity } from '../types'
 import { CLAWD_FRAMES, CLAWD_WINDOW } from './clawd-sprites'
 
-const P = 2
-// Most frames leave the top rows empty; only thinking/planning reach above this, and lose that part.
-const CROP_TOP = 8
-const VISIBLE_HEIGHT = CLAWD_WINDOW.height - CROP_TOP
+// 1.5 keeps every pixel crisp on 2x screens (3 device pixels) while keeping the band short.
+const P = 1.5
 
 export const MASCOT_WIDTH = CLAWD_WINDOW.width * P
-export const MASCOT_HEIGHT = VISIBLE_HEIGHT * P
+export const MASCOT_HEIGHT = CLAWD_WINDOW.height * P
 
 // The frames toggle with SMIL, which only plays when the Svg is drawn with `isInteractive`.
 export const mascotSvg = (activity: Activity, title: string) =>
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${MASCOT_WIDTH}" height="${MASCOT_HEIGHT}" viewBox="0 ${CROP_TOP} ${CLAWD_WINDOW.width} ${VISIBLE_HEIGHT}" shape-rendering="crispEdges"><title>${title}</title>${CLAWD_FRAMES[activity]}</svg>`
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${MASCOT_WIDTH}" height="${MASCOT_HEIGHT}" viewBox="0 0 ${CLAWD_WINDOW.width} ${CLAWD_WINDOW.height}" shape-rendering="crispEdges"><title>${title}</title>${CLAWD_FRAMES[activity]}</svg>`
 
 export const ACTIVITY_LABELS: Record<Activity, string> = {
   idle: 'hanging out',
