@@ -1,8 +1,9 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register, SessionUsage, Timer, TurnCompleteReason } from 'claude-code'
 
-import type { Activity, UsageSnapshot } from '../types'
-import { ACTIVITY_LABELS, MASCOT_HEIGHT, MASCOT_WIDTH, mascotSvg } from './mascot'
+import type { Activity, Skin, UsageSnapshot } from '../types'
+import { ACTIVITY_LABELS, MASCOT_SCALES, mascotBox, mascotSvg } from './mascot'
+import type { MascotSize } from './mascot'
 
 const snapshot = atom({ plugin: 'usage-buddy', key: 'snapshot' } as const, null)
 const isHidden = atom({ plugin: 'usage-buddy', key: 'isHidden' } as const, false)
@@ -87,6 +88,15 @@ const isStoredLimits = (v: unknown): v is StoredLimits => {
   )
 }
 
+const OCTOBER = 9
+
+const skinFor = (option: unknown, now: number): Skin => {
+  if (option === 'clawd' || option === 'halloween') return option
+  return new Date(now).getMonth() === OCTOBER ? 'halloween' : 'clawd'
+}
+
+const isMascotSize = (v: unknown): v is MascotSize => typeof v === 'string' && v in MASCOT_SCALES
+
 const ago = (ms: number) => {
   const minutes = Math.max(1, Math.round(ms / 60_000))
   if (minutes < 60) return `${minutes}m`
@@ -111,7 +121,10 @@ const endingFor = (reason: TurnCompleteReason, elapsedMs: number): Activity => {
   return elapsedMs > LONG_TURN_MS ? 'party' : 'done'
 }
 
-export const register: Register = on => {
+export const register: Register = (on, options) => {
+  const size: MascotSize = isMascotSize(options.mascotSize) ? options.mascotSize : 'large'
+  const box = mascotBox(size)
+
   on('session.start', async ($, e, next) => {
     const result = await next(e)
     await $.command.register({ name: 'usage-band', description: 'Show or hide the Claude usage band' })
@@ -189,12 +202,14 @@ export const register: Register = on => {
         {Svg ? (
           <Svg
             source={mascotSvg(
+              skinFor(options.skin, now),
+              size,
               doing,
               `${ACTIVITY_LABELS[doing]} · ${snap.limits.length === 0 ? 'no plan usage reported yet' : mood(top)}`,
             )}
             alt="Claude mascot"
-            width={MASCOT_WIDTH}
-            height={MASCOT_HEIGHT}
+            width={box.width}
+            height={box.height}
             isInteractive
           />
         ) : (
