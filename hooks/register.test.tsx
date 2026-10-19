@@ -1,4 +1,5 @@
 import { expect, mock, test } from 'claude-code/testing'
+import type { Engine } from 'claude-code/testing'
 
 const BAND = { component: 'AbovePrompt', props: { hasSurvey: false, isWorking: false, maxRows: 20, bodyColumns: 100, scroll: { offset: 0, bodyRows: 20 }, view: {} } } as const
 
@@ -114,4 +115,46 @@ test('a new session shows the last usage another session saw until fresh numbers
   expect(await live.find({ type: 'Text', text: /5%/ })).toBeDefined()
   expect(await live.find({ type: 'Text', text: /last seen/ })).toBeUndefined()
   await live.unmount()
+})
+
+const mascotSource = async ($: Engine) => {
+  const ui = await $.ui.mount({ plugin: 'usage-buddy', surface: 'desktop', ...BAND })
+  const [mascot] = await ui.findAll({ type: 'Svg' })
+  await ui.unmount()
+  return mascot
+}
+
+test('in October the mascot is a pumpkin in a witch hat', async ($, on) => {
+  mock.clock(on, { now: Date.parse('2026-10-31T12:00:00Z') })
+  on('session.measure', (_$, e) => ({ changed: e.changed }))
+  await $.session.measure({ context: { window: 200_000 }, rateLimits: [{ kind: 'five_hour', percentUsed: 10 }], changed: ['rateLimits'] })
+  const source = String((await mascotSource($))?.props.source)
+  expect(source).toContain('#f28c1b')
+  expect(source).toContain('#5b3480')
+  expect(source).not.toContain('#d97757')
+})
+
+test('outside October the mascot is plain Clawd', async ($, on) => {
+  mock.clock(on, { now: Date.parse('2026-11-15T12:00:00Z') })
+  on('session.measure', (_$, e) => ({ changed: e.changed }))
+  await $.session.measure({ context: { window: 200_000 }, rateLimits: [{ kind: 'five_hour', percentUsed: 10 }], changed: ['rateLimits'] })
+  const source = String((await mascotSource($))?.props.source)
+  expect(source).toContain('#d97757')
+  expect(source).not.toContain('#5b3480')
+})
+
+test('the halloween skin applies any month when chosen', { options: { skin: 'halloween' } }, async ($, on) => {
+  mock.clock(on, { now: Date.parse('2026-03-01T12:00:00Z') })
+  on('session.measure', (_$, e) => ({ changed: e.changed }))
+  await $.session.measure({ context: { window: 200_000 }, rateLimits: [{ kind: 'five_hour', percentUsed: 10 }], changed: ['rateLimits'] })
+  expect(String((await mascotSource($))?.props.source)).toContain('#5b3480')
+})
+
+test('the small size draws the mascot at one CSS pixel per sprite pixel', { options: { mascotSize: 'small' } }, async ($, on) => {
+  mock.clock(on)
+  on('session.measure', (_$, e) => ({ changed: e.changed }))
+  await $.session.measure({ context: { window: 200_000 }, rateLimits: [{ kind: 'five_hour', percentUsed: 10 }], changed: ['rateLimits'] })
+  const mascot = await mascotSource($)
+  expect(mascot?.props.height).toBe(26)
+  expect(String(mascot?.props.source)).toContain('height="26"')
 })

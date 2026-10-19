@@ -21,6 +21,9 @@ export type Activity =
   | 'resting'
   | 'dizzy'
 
+/** The mascot's look; the `skin` option's `auto` picks `halloween` through October. */
+export type Skin = 'clawd' | 'halloween'
+
 declare module 'claude-code' {
   interface PluginState {
     'usage-buddy': { snapshot: UsageSnapshot | null; isHidden: boolean; activity: Activity }

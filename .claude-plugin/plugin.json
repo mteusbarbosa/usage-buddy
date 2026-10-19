@@ -1,1 +1,24 @@
-{ "name": "usage-buddy", "version": "0.1.0", "description": "Claude mascot above the prompt with your 5-hour and weekly plan usage", "author": { "name": "mteusbarbosa" }, "homepage": "https://github.com/mteusbarbosa/usage-buddy", "types": "./types/index.d.ts" }
+{
+  "name": "usage-buddy",
+  "version": "0.2.0",
+  "description": "Claude mascot above the prompt with your 5-hour and weekly plan usage",
+  "author": { "name": "mteusbarbosa" },
+  "homepage": "https://github.com/mteusbarbosa/usage-buddy",
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "skin": {
+      "type": "string",
+      "title": "Mascot skin",
+      "description": "auto dresses Clawd as a pumpkin in a witch hat through October",
+      "options": ["auto", "clawd", "halloween"],
+      "default": "auto"
+    },
+    "mascotSize": {
+      "type": "string",
+      "title": "Mascot size",
+      "description": "The mascot sets the band's height: large 52px, medium 39px, small 26px",
+      "options": ["large", "medium", "small"],
+      "default": "large"
+    }
+  }
+}
